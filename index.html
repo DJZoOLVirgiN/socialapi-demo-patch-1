@@ -1,0 +1,44 @@
+<html>
+<head>
+  <title>Demo Social Service</title>
+  <link id="siteicon" rel="icon" href="./firefox.png"/>
+  <script src="./manifest.js" type="text/javascript"></script>
+
+<script>
+var loc = location.href;
+var baseurl = loc.substring(0,loc.lastIndexOf('/'));
+
+function activate(node) {
+  var manifest = getManifest();
+  manifest.version++;
+  var uMatch = navigator.userAgent.match(/Firefox\/(.*)$/),
+    ffVersion;
+  if (uMatch && uMatch.length > 1) {
+    ffVersion = uMatch[1];
+  }
+  var event = new CustomEvent("ActivateSocialFeature");
+  if (parseInt(ffVersion) == 21) {
+    document.dispatchEvent(event); // required for fx21
+  } else {
+    node.setAttribute("data-service", JSON.stringify(manifest));
+    node.dispatchEvent(event);
+  }
+  // second activation will add the shareURL
+  manifest.shareURL = baseurl+"/share.html#%{url}"
+}
+</script>
+</head>
+<body>
+
+
+<!-- activation requires user input, first button works, second does not. -->
+<dl>This button illustrates how to activate a provider from the web.</dl>
+<dl><button onclick="activate(this)" title="activate the demo provider">Activate The Demo Provider</button></dl>
+<!-- next button illustrates that activation requires user input,
+     otherwise it will be ignored by the browser -->
+<div>
+<dl>This button shows that events must be user initiated in order to activate the provider.  Nothing will happen when this button is clicked.</dl>
+<dl><button onclick="setTimeout(activate, 1000, this)">Auto Activate provider without user input (should fail)</button></dl>
+</div>
+</body>
+</html>
